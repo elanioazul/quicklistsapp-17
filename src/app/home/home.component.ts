@@ -4,6 +4,7 @@ import { FormModalComponent } from '../shared/ui/form-modal.component';
 import { Checklist } from '../shared/interfaces/checklist';
 import { FormBuilder } from '@angular/forms';
 import { ChecklistService } from '../shared/data-access/checklist.service';
+import { ChecklistListComponent } from './ui/checklist-list.component';
 
 @Component({
   selector: 'app-home',
@@ -27,9 +28,13 @@ import { ChecklistService } from '../shared/data-access/checklist.service';
           />
       </ng-template>
     </app-modal>
+    <section>
+      <h2>Your checklists</h2>
+      <app-checklist-list [checklists]="checklistService.checklists()" />
+    </section>
   `,
   styles: ``,
-  imports: [ModalComponent, FormModalComponent]
+  imports: [ModalComponent, FormModalComponent, ChecklistListComponent]
 })
 export default class HomeComponent {
   checklistService = inject(ChecklistService)
