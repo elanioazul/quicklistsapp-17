@@ -10,22 +10,22 @@ import { ChecklistListComponent } from './ui/checklist-list.component';
   selector: 'app-home',
   standalone: true,
   template: `
-     <header>
+    <header>
       <h1>Quicklists</h1>
       <button (click)="checklistBeingEdited.set({})">Add Checklist</button>
     </header>
     <app-modal [isOpen]="!!checklistBeingEdited()">
       <ng-template>
-          <app-form-modal
-            [title]="
-              checklistBeingEdited()?.title
-                ? checklistBeingEdited()!.title!
-                : 'Add Checklist'
-            "
-            [formGroup]="checklistForm"
-            (close)="checklistBeingEdited.set(null)"
-            (save)="checklistService.add$.next(checklistForm.getRawValue())"
-          />
+        <app-form-modal
+          [title]="
+            checklistBeingEdited()?.title
+              ? checklistBeingEdited()!.title!
+              : 'Add Checklist'
+          "
+          [formGroup]="checklistForm"
+          (close)="checklistBeingEdited.set(null)"
+          (save)="checklistService.add$.next(checklistForm.getRawValue())"
+        />
       </ng-template>
     </app-modal>
     <section>
@@ -34,12 +34,12 @@ import { ChecklistListComponent } from './ui/checklist-list.component';
     </section>
   `,
   styles: ``,
-  imports: [ModalComponent, FormModalComponent, ChecklistListComponent]
+  imports: [ModalComponent, FormModalComponent, ChecklistListComponent],
 })
 export default class HomeComponent {
-  checklistService = inject(ChecklistService)
+  checklistService = inject(ChecklistService);
   formBuilder = inject(FormBuilder);
-  
+
   checklistBeingEdited = signal<Partial<Checklist> | null>(null);
   checklistForm = this.formBuilder.nonNullable.group({
     title: [''],
@@ -52,7 +52,6 @@ export default class HomeComponent {
       if (!checklist) {
         this.checklistForm.reset();
       }
-    })
+    });
   }
-
 }

@@ -1,16 +1,18 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Checklist } from '../../shared/interfaces/checklist';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-checklist-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [RouterLink],
   template: `
     <ul>
       @for (list of checklists; track $index) {
         <li>
-          {{list.title}}
+          <a routerLink="/checklist/{{ list.id }}">
+            {{ list.title }}
+          </a>
         </li>
       } @empty {
         <p>Click the add button to create your first checklist!</p>
