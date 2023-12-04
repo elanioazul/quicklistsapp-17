@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, take } from 'rxjs';
+import { EMPTY, Subject, catchError, take } from 'rxjs';
 import {
   AddChecklist,
   Checklist,
@@ -8,6 +8,7 @@ import {
 } from '../interfaces/checklist';
 import { StorageService } from './storage.service';
 import { ChecklistItemService } from '../../checklist/data-access/checklist-item.service';
+import { connect } from 'ngxtension/connect';
 
 export interface ChecklistsState {
   checklists: Checklist[];
@@ -20,7 +21,12 @@ export interface ChecklistsState {
 })
 export class ChecklistService {
   storageService = inject(StorageService);
-  private checklistsLoaded$ = this.storageService.loadChecklists();
+  private checklistsLoaded$ = this.storageService.loadChecklists().pipe(
+    catchError((err) => {
+      this.error$.next(err);
+      return EMPTY;
+    })
+  );
 
   checklistItemService = inject(ChecklistItemService);
 
@@ -39,6 +45,7 @@ export class ChecklistService {
   add$ = new Subject<AddChecklist>();
   remove$ = this.checklistItemService.checklistRemoved$;
   edit$ = new Subject<EditChecklist>();
+  private error$ = new Subject<string>();
 
   constructor() {
     // reducers
