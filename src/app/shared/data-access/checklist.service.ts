@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EMPTY, Subject, catchError, take } from 'rxjs';
+import { EMPTY, Subject, catchError, map, merge, take } from 'rxjs';
 import {
   AddChecklist,
   Checklist,
@@ -49,42 +49,66 @@ export class ChecklistService {
 
   constructor() {
     // reducers
-    this.add$.pipe(takeUntilDestroyed()).subscribe((checklist) =>
-      this.state.update((state) => ({
-        ...state,
+    const nextState$ = merge(
+      this.checklistsLoaded$.pipe(
+        map((checklists) => ({ checklists, loaded: true }))
+      ),
+      this.error$.pipe(map((error) => ({ error })))
+    );
+    connect(this.state)
+      .with(nextState$)
+      .with(this.add$, (state, checklist) => ({
         checklists: [...state.checklists, this.addIdToChecklist(checklist)],
       }))
-    );
-
-    this.remove$.pipe(takeUntilDestroyed()).subscribe((removed) =>
-      this.state.update((state) => ({
-        ...state,
+      .with(this.remove$, (state, removed) => ({
         checklists: state.checklists.filter(
           (checklist) => checklist.id !== removed
         ),
       }))
-    );
-
-    this.edit$.pipe(takeUntilDestroyed()).subscribe((eddited) =>
-      this.state.update((state) => ({
-        ...state,
+      .with(this.edit$, (state, eddited) => ({
         checklists: state.checklists.map((checklist) =>
           checklist.id === eddited.id
             ? { ...checklist, title: eddited.data.title }
             : checklist
         ),
-      }))
-    );
+      }));
 
-    this.checklistsLoaded$.pipe(takeUntilDestroyed()).subscribe({
-      next: (checklists) =>
-        this.state.update((state) => ({
-          ...state,
-          checklists,
-          loaded: true,
-        })),
-      error: (err) => this.state.update((state) => ({ ...state, error: err })),
-    });
+    // this.add$.pipe(takeUntilDestroyed()).subscribe((checklist) =>
+    //   this.state.update((state) => ({
+    //     ...state,
+    //     checklists: [...state.checklists, this.addIdToChecklist(checklist)],
+    //   }))
+    // );
+
+    // this.remove$.pipe(takeUntilDestroyed()).subscribe((removed) =>
+    //   this.state.update((state) => ({
+    //     ...state,
+    //     checklists: state.checklists.filter(
+    //       (checklist) => checklist.id !== removed
+    //     ),
+    //   }))
+    // );
+
+    // this.edit$.pipe(takeUntilDestroyed()).subscribe((eddited) =>
+    //   this.state.update((state) => ({
+    //     ...state,
+    //     checklists: state.checklists.map((checklist) =>
+    //       checklist.id === eddited.id
+    //         ? { ...checklist, title: eddited.data.title }
+    //         : checklist
+    //     ),
+    //   }))
+    // );
+
+    // this.checklistsLoaded$.pipe(takeUntilDestroyed()).subscribe({
+    //   next: (checklists) =>
+    //     this.state.update((state) => ({
+    //       ...state,
+    //       checklists,
+    //       loaded: true,
+    //     })),
+    //   error: (err) => this.state.update((state) => ({ ...state, error: err })),
+    // });
 
     //efects
     effect(() => {
